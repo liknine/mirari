@@ -1,6 +1,6 @@
 {
   "name": "mirari-telegram-worker",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,10 @@
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
     "webhook:set": "node scripts/set-webhook.mjs",
-    "commands:set": "node scripts/set-commands.mjs"
+    "commands:set": "node scripts/set-commands.mjs",
+    "d1:create": "wrangler d1 create mirari-catalog",
+    "d1:migrate": "wrangler d1 execute mirari-catalog --remote --file=./migrations/0001_product_overrides.sql",
+    "d1:import-static": "node scripts/generate-static-overrides-import.mjs && wrangler d1 execute mirari-catalog --remote --file=./migrations/0002_import_static_overrides.sql"
   },
   "devDependencies": {
     "typescript": "latest",

@@ -22,5 +22,12 @@
 			"id": "b471bed2058040bcb6bb861b6ea1767c",
 			"remote": true
 		}
-	]
+	],
+	"d1_databases": [
+    {
+      "binding": "CATALOG_DB",
+      "database_name": "mirari-catalog",
+      "database_id": "f5310569-8ff3-4144-b825-09740e5edf9e"
+    }
+  ]
 }

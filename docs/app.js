@@ -6,6 +6,7 @@
   const CART_KEY = 'mirari_cart_v1';
   const RECENT_KEY = 'mirari_recent_v1';
   const PAGE_SIZE = Number(CONFIG.pageSize) || 24;
+  const API_BASE = String(CONFIG.apiBase || '').replace(/\/+$/, '');
   const cache = new Map();
 
   const CATEGORY_LABELS = {
@@ -130,6 +131,47 @@
     const json = await response.json();
     if (!fresh) cache.set(url, json);
     return json;
+  }
+
+  function mergeOverrides(staticLayer, liveLayer) {
+    const base = staticLayer && typeof staticLayer === 'object' ? staticLayer : {};
+    const live = liveLayer && typeof liveLayer === 'object' ? liveLayer : {};
+    const products = {
+      ...(base.products && typeof base.products === 'object' ? base.products : {}),
+      ...(live.products && typeof live.products === 'object' ? live.products : {})
+    };
+    const deleted = new Set([
+      ...(Array.isArray(base.deletedIds) ? base.deletedIds : []),
+      ...(Array.isArray(live.deletedIds) ? live.deletedIds : [])
+    ].map(String));
+
+    Object.keys(live.products || {}).forEach((id) => deleted.delete(String(id)));
+
+    return {
+      version: Math.max(Number(base.version) || 1, Number(live.version) || 1),
+      updatedAt: String(live.updatedAt || base.updatedAt || ''),
+      products,
+      deletedIds: [...deleted]
+    };
+  }
+
+  async function loadOverrides() {
+    const staticRequest = fetchJson('data/catalog-overrides.json', { fresh: true })
+      .catch(() => ({ version: 1, products: {}, deletedIds: [] }));
+    const liveRequest = API_BASE
+      ? fetch(`${API_BASE}/api/catalog-overrides?v=${Date.now()}`, { cache: 'no-store' })
+          .then((response) => {
+            if (!response.ok) throw new Error('D1 overrides unavailable');
+            return response.json();
+          })
+          .catch((error) => {
+            console.warn('Mirari: live catalog changes unavailable', error);
+            return { version: 2, products: {}, deletedIds: [] };
+          })
+      : Promise.resolve({ version: 2, products: {}, deletedIds: [] });
+
+    const [staticLayer, liveLayer] = await Promise.all([staticRequest, liveRequest]);
+    return mergeOverrides(staticLayer, liveLayer);
   }
 
   function escapeHtml(value) {
@@ -696,6 +738,19 @@
       else if (state.activeProduct) closeProduct({ replaceHistory: false });
     });
     try { TG?.BackButton?.onClick?.(goBack); } catch {}
+
+    let lastOverrideRefresh = 0;
+    document.addEventListener('visibilitychange', async () => {
+      if (document.hidden || !API_BASE || Date.now() - lastOverrideRefresh < 10000) return;
+      lastOverrideRefresh = Date.now();
+      try {
+        state.overrides = await loadOverrides();
+        if (state.view === 'products' && state.category) await loadProducts(state.category, state.subcategory);
+        else if (state.view === 'categories') renderCategories();
+      } catch (error) {
+        console.warn('Mirari: catalog changes refresh failed', error);
+      }
+    });
   }
 
   async function bootstrap() {
@@ -707,7 +762,7 @@
     try {
       const [manifest, overrides] = await Promise.all([
         fetchJson('catalog-data/manifest.json'),
-        fetchJson('data/catalog-overrides.json', { fresh: true }).catch(() => ({ version: 1, products: {}, deletedIds: [] }))
+        loadOverrides()
       ]);
       state.manifest = manifest;
       state.overrides = overrides && typeof overrides === 'object' ? overrides : state.overrides;
