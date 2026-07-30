@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#212c45" />
+  <title>Mirari</title>
+  <link rel="preconnect" href="https://telegram.org" />
+  <link rel="stylesheet" href="./style.css?v=20260730-1" />
+  <script src="https://telegram.org/js/telegram-web-app.js?63"></script>
+  <script src="./config.js?v=20260730-1"></script>
+  <script defer src="./app.js?v=20260730-1"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="icon-button back-button" type="button" aria-label="Назад" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="brand-button" type="button" aria-label="На главную">
+        <span class="brand">Mirari</span>
+        <span class="brand-subtitle">private selection</span>
+      </button>
+      <button class="icon-button search-toggle" type="button" aria-label="Поиск">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+      </button>
+    </header>
+
+    <div class="search-panel" hidden>
+      <label class="search-box">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+        <input class="search-input" type="search" placeholder="Поиск по каталогу" autocomplete="off" />
+        <button class="search-clear" type="button" aria-label="Очистить">×</button>
+      </label>
+    </div>
+
+    <main class="main-content" id="main-content">
+      <section class="screen screen-catalog is-active" data-screen="catalog" aria-labelledby="catalog-title">
+        <div class="catalog-intro">
+          <div>
+            <p class="eyebrow">каталог</p>
+            <h1 id="catalog-title">Выберите раздел</h1>
+          </div>
+          <div class="gender-switch" role="tablist" aria-label="Раздел каталога">
+            <button type="button" class="gender-button is-active" data-gender="male" role="tab">Мужское</button>
+            <button type="button" class="gender-button" data-gender="female" role="tab">Женское</button>
+          </div>
+        </div>
+
+        <div class="breadcrumbs" aria-label="Навигация" hidden></div>
+        <div class="catalog-status" role="status" aria-live="polite"></div>
+        <div class="catalog-grid category-grid" data-category-grid></div>
+        <div class="catalog-grid subcategory-grid" data-subcategory-grid hidden></div>
+        <div class="product-grid" data-product-grid hidden></div>
+        <div class="empty-state" data-empty-state hidden>
+          <p>Ничего не найдено</p>
+          <button type="button" class="text-button" data-reset-search>Сбросить поиск</button>
+        </div>
+        <button type="button" class="load-more" data-load-more hidden>Показать ещё</button>
+      </section>
+
+      <section class="screen screen-cart" data-screen="cart" aria-labelledby="cart-title" hidden>
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">корзина</p>
+            <h1 id="cart-title">Ваш выбор</h1>
+          </div>
+          <span class="cart-count-label" data-cart-count-label>0 товаров</span>
+        </div>
+        <div class="cart-list" data-cart-list></div>
+        <div class="cart-empty" data-cart-empty>
+          <div class="empty-icon">M</div>
+          <h2>Корзина пока пустая</h2>
+          <p>Добавьте товары из каталога — они сохранятся в приложении.</p>
+          <button type="button" class="primary-button" data-go-catalog>Перейти в каталог</button>
+        </div>
+        <div class="cart-summary" data-cart-summary hidden>
+          <div class="summary-row"><span>Товары</span><strong data-cart-items-count>0</strong></div>
+          <div class="summary-row summary-total"><span>Итого</span><strong data-cart-total>0 BYN / 0 ₽</strong></div>
+          <button type="button" class="primary-button checkout-button" data-checkout>Написать менеджеру</button>
+          <p class="summary-note">Менеджер подтвердит актуальную стоимость и наличие перед оформлением.</p>
+        </div>
+      </section>
+
+      <section class="screen screen-profile" data-screen="profile" aria-labelledby="profile-title" hidden>
+        <div class="profile-card">
+          <div class="profile-avatar" data-profile-avatar><span>M</span></div>
+          <div class="profile-copy">
+            <p class="eyebrow">профиль</p>
+            <h1 id="profile-title" data-profile-name>Гость Mirari</h1>
+            <p data-profile-username>Откройте приложение через Telegram</p>
+          </div>
+        </div>
+        <div class="profile-panel">
+          <div class="profile-panel-row">
+            <span>Персональный подбор</span>
+            <span>по вашему бюджету</span>
+          </div>
+          <p>Работаем напрямую с фабрикой. Каждую позицию можно подобрать по стоимости и исполнению.</p>
+          <button type="button" class="primary-button" data-contact-manager>Связаться с менеджером</button>
+        </div>
+        <div class="profile-panel profile-panel-light">
+          <p class="profile-panel-title">О Mirari</p>
+          <p>Каталог премиальных вещей с персональной консультацией и подбором под ваш запрос.</p>
+        </div>
+      </section>
+
+      <section class="product-view" data-product-view hidden aria-live="polite">
+        <div class="product-gallery" data-product-gallery></div>
+        <div class="product-detail-copy">
+          <p class="product-detail-brand" data-product-brand></p>
+          <h1 data-product-name></h1>
+          <p class="product-detail-price" data-product-price></p>
+          <p class="product-detail-note">Актуальную стоимость и наличие подтвердит менеджер перед оформлением заказа.</p>
+          <div class="product-detail-description" data-product-description></div>
+          <div class="product-actions">
+            <button type="button" class="secondary-button" data-add-to-cart>В корзину</button>
+            <button type="button" class="primary-button" data-buy-now>Купить</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Основная навигация">
+      <button type="button" class="nav-item is-active" data-tab="catalog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v13H4z"/><path d="M8 5.5V4h8v1.5"/></svg>
+        <span>Каталог</span>
+      </button>
+      <button type="button" class="nav-item" data-tab="cart">
+        <span class="nav-icon-wrap">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14l-1 12H6L5 7z"/><path d="M9 7a3 3 0 016 0"/></svg>
+          <span class="cart-badge" data-cart-badge hidden>0</span>
+        </span>
+        <span>Корзина</span>
+      </button>
+      <button type="button" class="nav-item" data-tab="profile">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0113 0"/></svg>
+        <span>Профиль</span>
+      </button>
+    </nav>
+  </div>
+
+  <div class="toast" data-toast role="status" aria-live="polite" hidden></div>
+</body>
+</html>

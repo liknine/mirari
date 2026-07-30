@@ -1,0 +1,4 @@
+BOT_TOKEN=123456:replace_me
+WEBHOOK_SECRET=replace_with_random_secret
+ADMIN_IDS=123456789
+GITHUB_TOKEN=github_pat_replace_me
