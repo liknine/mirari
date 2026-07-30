@@ -1,23 +1,26 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "mirari-telegram-bot",
-  "main": "src/index.ts",
-  "compatibility_date": "2026-07-30",
-  "observability": { "enabled": true },
-  "vars": {
-    "MINI_APP_URL": "https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPOSITORY/",
-    "MANAGER_USERNAME": "und333r",
-    "GITHUB_REPO": "YOUR_GITHUB_USERNAME/YOUR_REPOSITORY",
-    "GITHUB_BRANCH": "main",
-    "GITHUB_OVERRIDES_PATH": "docs/data/catalog-overrides.json",
-    "GITHUB_PRODUCT_ASSETS_DIR": "docs/assets/products",
-    "GITHUB_COMMITTER_NAME": "Mirari Catalog Bot",
-    "GITHUB_COMMITTER_EMAIL": "bot@users.noreply.github.com"
-  },
-  "kv_namespaces": [
-    {
-      "binding": "ADMIN_STATE",
-      "id": "PASTE_KV_NAMESPACE_ID_HERE"
-    }
-  ]
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "mirari-telegram-bot",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-07-30",
+	"observability": {
+		"enabled": true
+	},
+	"vars": {
+		"MINI_APP_URL": "https://liknine.github.io/mirari/",
+		"MANAGER_USERNAME": "und333r",
+		"GITHUB_REPO": "liknine/mirari",
+		"GITHUB_BRANCH": "main",
+		"GITHUB_OVERRIDES_PATH": "docs/data/catalog-overrides.json",
+		"GITHUB_PRODUCT_ASSETS_DIR": "docs/assets/products",
+		"GITHUB_COMMITTER_NAME": "Mirari Catalog Bot",
+		"GITHUB_COMMITTER_EMAIL": "bot@users.noreply.github.com"
+	},
+	"kv_namespaces": [
+		{
+			"binding": "ADMIN_STATE",
+			"id": "b471bed2058040bcb6bb861b6ea1767c",
+			"remote": true
+		}
+	]
 }
