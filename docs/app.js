@@ -44,6 +44,21 @@
     'windbreakers-sub': 'Ветровки', 'winter-sneakers-sub': 'Зимние кроссовки'
   };
 
+  const SUBCATEGORY_PRIORITY = {
+    male: {
+      clothes: ['tshirts-sub', 'maiki', 'polo-sub', 'hoodies-sub', 'sweaters-sub', 'jackets-sub', 'down-jackets-sub', 'shirts-sub', 'pants-sub', 'jeans-sub', 'sportpants-sub', 'sportsuit-sub', 'shorts-sub', 'sweatshirts-sub', 'windbreakers-sub', 'vests-sub', 'suits-sub', 'bombers-sub', 'coats-sub', 'jeans-jackets-sub', 'beach-suits-sub', 'swim-sub', 'ski-sub', 'underwear-sub', 'socks-sub'],
+      shoes: ['sneakers-sub', 'loafers-sub', 'dress-shoes-sub', 'boots-sub', 'winter-sneakers-sub', 'canvas-shoes-sub', 'sandals-sub', 'flip-flops-sub', 'high-boots-sub', 'clogs-sub', 'slippers-sub'],
+      bags: ['crossbody-sub', 'all-bags-sub', 'backpacks-sub', 'wallets-sub', 'briefcases-sub', 'travel-bags-sub', 'waist-bags-sub', 'cosmetic-bags-sub', 'suitcases-sub', 'document-covers-sub', 'saddle-bags-sub'],
+      accessories: ['glasses-sub', 'jewelry-sub', 'scarves-sub', 'caps-sub', 'hats-sub', 'gloves-sub', 'keychains-sub', 'panamas-sub', 'umbrellas-sub', 'phone-cases-sub']
+    },
+    female: {
+      clothes: ['tshirts-sub', 'tops-sub', 'dresses-sub', 'sweaters-sub', 'jackets-sub', 'down-jackets-sub', 'hoodies-sub', 'jeans-sub', 'pants-sub', 'skirts-shorts-sub', 'blouses-sub', 'blazers-sub', 'suits-sub', 'shirts-sub', 'coats-sub', 'coat', 'sportsuits-sub', 'sportpants-sub', 'sweatshirts-sub', 'vests-sub', 'bombers-sub', 'windbreakers-sub', 'swimsuit-sub', 'beach-sub', 'home-clothes-sub', 'underwear-sub', 'bodysuit-sub', 'leggings-sub', 'jumpsuits-sub', 'jeans-jackets-sub', 'ski-sub', 'socks-sub', 'skirts-sub'],
+      shoes: ['sneakers-sub', 'loafers-sub', 'ballerinas-sub', 'heels-sub', 'boots-sub', 'high-boots-sub', 'uggs-sub', 'winter-sneakers-sub', 'canvas-shoes-sub', 'mules-sub', 'sandals-open-sub', 'flip-flops-sub', 'cowboy-boots-sub', 'dress-shoes-sub', 'home-shoes-sub', 'slippers-sub'],
+      bags: ['hand-bags-sub', 'crossbody-sub', 'mini-bags-sub', 'all-bags-sub', 'backpacks-sub', 'wallets-sub', 'clutches-sub', 'travel-bags-sub', 'beach-bags-sub', 'cosmetic-bags-sub', 'waist-bags-sub', 'suitcases-sub', 'document-covers-sub', 'saddle-bags-sub'],
+      accessories: ['jewelry-sub', 'bracelets-sub', 'earrings-sub', 'rings-sub', 'chains-sub', 'glasses-sub', 'scarves-sub', 'hair-acc-sub', 'caps-sub', 'hats-sub', 'gloves-sub', 'kerchiefs-sub', 'panamas-sub', 'umbrellas-sub']
+    }
+  };
+
   const state = {
     tab: 'catalog',
     gender: 'male',
@@ -57,6 +72,7 @@
     activeProduct: null,
     searchQuery: '',
     searchItems: null,
+    filters: { brands: [], currency: 'BYN', min: null, max: null, sort: 'newest' },
     cart: loadCart(),
     loading: false
   };
@@ -79,8 +95,21 @@
     searchPanel: document.querySelector('.search-panel'),
     searchInput: document.querySelector('.search-input'),
     searchClear: document.querySelector('.search-clear'),
+    filterToolbar: document.querySelector('[data-filter-toolbar]'),
+    filterToggle: document.querySelector('[data-filter-toggle]'),
+    filterCount: document.querySelector('[data-filter-count]'),
+    filterResultCount: document.querySelector('[data-filter-result-count]'),
+    filterPanel: document.querySelector('[data-filter-panel]'),
+    filterBrands: document.querySelector('[data-filter-brands]'),
+    filterCurrencyButtons: [...document.querySelectorAll('[data-filter-currency]')],
+    filterMin: document.querySelector('[data-filter-min]'),
+    filterMax: document.querySelector('[data-filter-max]'),
+    filterSort: document.querySelector('[data-filter-sort]'),
+    filterApply: document.querySelector('[data-filter-apply]'),
+    filterReset: document.querySelector('[data-filter-reset]'),
     productView: document.querySelector('[data-product-view]'),
     productGallery: document.querySelector('[data-product-gallery]'),
+    productDots: document.querySelector('[data-product-dots]'),
     productBrand: document.querySelector('[data-product-brand]'),
     productName: document.querySelector('[data-product-name]'),
     productPrice: document.querySelector('[data-product-price]'),
@@ -187,6 +216,25 @@
 
   function categoryLabel(slug) { return CATEGORY_LABELS[slug] || humanize(slug); }
   function subcategoryLabel(slug) { return SUBCATEGORY_LABELS[slug] || humanize(slug); }
+  function sortedSubcategories(categorySlug, subcategories) {
+    const priority = SUBCATEGORY_PRIORITY[state.gender]?.[categorySlug] || [];
+    const positions = new Map(priority.map((slug, index) => [slug, index]));
+    return [...(subcategories || [])].sort((a, b) => {
+      const aRank = positions.has(a.slug) ? positions.get(a.slug) : Number.MAX_SAFE_INTEGER;
+      const bRank = positions.has(b.slug) ? positions.get(b.slug) : Number.MAX_SAFE_INTEGER;
+      if (aRank !== bRank) return aRank - bRank;
+      return Number(b.count || 0) - Number(a.count || 0);
+    });
+  }
+  function cleanDescriptionPart(value) {
+    const text = String(value || '').trim();
+    if (!text) return '';
+    return text
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter((line) => line && !/^состав\s+уточняется[.!]?$/i.test(line))
+      .join('\n');
+  }
   function plural(count, one, few, many) {
     const n = Math.abs(Number(count)) % 100;
     const n1 = n % 10;
@@ -321,6 +369,8 @@
     els.loadMore.hidden = true;
     els.empty.hidden = true;
     els.breadcrumbs.hidden = true;
+    els.filterToolbar.hidden = true;
+    els.filterPanel.hidden = true;
     els.back.hidden = true;
     els.searchInput.value = '';
 
@@ -351,9 +401,12 @@
     els.productGrid.hidden = true;
     els.loadMore.hidden = true;
     els.empty.hidden = true;
+    els.filterToolbar.hidden = true;
+    els.filterPanel.hidden = true;
     els.back.hidden = false;
     renderBreadcrumbs();
-    els.subcategoryGrid.innerHTML = category.subcategories.map((subcategory) => `
+    const subcategories = sortedSubcategories(categorySlug, category.subcategories);
+    els.subcategoryGrid.innerHTML = subcategories.map((subcategory) => `
       <button type="button" class="subcategory-card" data-subcategory="${escapeHtml(subcategory.slug)}">
         <div class="card-image">${imageMarkup(baseUrl(subcategory.coverImage), subcategoryLabel(subcategory.slug))}</div>
         <div class="subcategory-card-copy">
@@ -377,12 +430,15 @@
     state.subcategory = subcategorySlug;
     state.visibleCount = PAGE_SIZE;
     state.searchQuery = '';
+    resetFilters({ render: false });
     els.catalogTitle.textContent = subcategorySlug ? subcategoryLabel(subcategorySlug) : categoryLabel(categorySlug);
     els.categoryGrid.hidden = true;
     els.subcategoryGrid.hidden = true;
     els.productGrid.hidden = false;
     els.back.hidden = false;
     els.empty.hidden = true;
+    els.filterToolbar.hidden = !subcategorySlug;
+    els.filterPanel.hidden = true;
     renderBreadcrumbs();
     setLoading('Загружаем товары…');
     try {
@@ -391,6 +447,7 @@
         : `catalog-data/listings/${state.gender}/${categorySlug}.json`;
       const data = await fetchJson(path);
       state.currentItems = applyOverrides(data.items || []).sort((a, b) => Number(b.id) - Number(a.id));
+      renderFilterControls();
       renderProducts();
     } catch (error) {
       console.error(error);
@@ -402,21 +459,97 @@
     clearLoading();
   }
 
+  function activeFilterCount() {
+    return state.filters.brands.length
+      + (state.filters.min !== null ? 1 : 0)
+      + (state.filters.max !== null ? 1 : 0)
+      + (state.filters.sort !== 'newest' ? 1 : 0);
+  }
+
+  function filteredProducts() {
+    if (!state.subcategory) return [...state.currentItems];
+    const currencyKey = state.filters.currency === 'RUB' ? 'priceRub' : 'priceByn';
+    let items = [...state.currentItems];
+    if (state.filters.brands.length) {
+      const selected = new Set(state.filters.brands);
+      items = items.filter((product) => selected.has(product.brand || 'Без бренда'));
+    }
+    if (state.filters.min !== null) items = items.filter((product) => Number(product[currencyKey] || 0) >= state.filters.min);
+    if (state.filters.max !== null) items = items.filter((product) => Number(product[currencyKey] || 0) <= state.filters.max);
+    if (state.filters.sort === 'price-asc') items.sort((a, b) => Number(a[currencyKey] || 0) - Number(b[currencyKey] || 0));
+    if (state.filters.sort === 'price-desc') items.sort((a, b) => Number(b[currencyKey] || 0) - Number(a[currencyKey] || 0));
+    if (state.filters.sort === 'brand') items.sort((a, b) => String(a.brand || '').localeCompare(String(b.brand || ''), 'ru'));
+    return items;
+  }
+
+  function renderFilterControls() {
+    if (!state.subcategory) {
+      els.filterToolbar.hidden = true;
+      els.filterPanel.hidden = true;
+      return;
+    }
+    const brands = [...new Set(state.currentItems.map((item) => item.brand || 'Без бренда'))]
+      .sort((a, b) => a.localeCompare(b, 'ru'));
+    els.filterBrands.innerHTML = brands.map((brand) => `
+      <label class="brand-filter-option">
+        <input type="checkbox" value="${escapeHtml(brand)}" ${state.filters.brands.includes(brand) ? 'checked' : ''}>
+        <span>${escapeHtml(brand)}</span>
+      </label>`).join('');
+    els.filterCurrencyButtons.forEach((button) => button.classList.toggle('is-active', button.dataset.filterCurrency === state.filters.currency));
+    els.filterMin.value = state.filters.min ?? '';
+    els.filterMax.value = state.filters.max ?? '';
+    els.filterSort.value = state.filters.sort;
+    const count = activeFilterCount();
+    els.filterCount.textContent = count ? String(count) : '';
+    els.filterCount.hidden = count === 0;
+  }
+
+  function resetFilters({ render = true } = {}) {
+    state.filters = { brands: [], currency: 'BYN', min: null, max: null, sort: 'newest' };
+    if (render) {
+      renderFilterControls();
+      renderProducts();
+    }
+  }
+
+  function applyFilterForm() {
+    state.filters.brands = [...els.filterBrands.querySelectorAll('input:checked')].map((input) => input.value);
+    const minValue = Number(els.filterMin.value);
+    const maxValue = Number(els.filterMax.value);
+    state.filters.min = els.filterMin.value === '' || !Number.isFinite(minValue) ? null : Math.max(0, minValue);
+    state.filters.max = els.filterMax.value === '' || !Number.isFinite(maxValue) ? null : Math.max(0, maxValue);
+    if (state.filters.min !== null && state.filters.max !== null && state.filters.min > state.filters.max) {
+      [state.filters.min, state.filters.max] = [state.filters.max, state.filters.min];
+    }
+    state.filters.sort = els.filterSort.value || 'newest';
+    state.visibleCount = PAGE_SIZE;
+    renderFilterControls();
+    renderProducts();
+    els.filterPanel.hidden = true;
+  }
+
   function renderProducts() {
-    const items = state.currentItems.slice(0, state.visibleCount);
+    const filtered = filteredProducts();
+    const items = filtered.slice(0, state.visibleCount);
     els.productGrid.innerHTML = items.map((product) => `
       <button type="button" class="product-card" data-product-id="${escapeHtml(product.id)}">
         <div class="product-card-image">${imageMarkup(getImage(product), `${product.brand || ''} ${product.name || ''}`)}</div>
         <div class="product-card-copy">
           <p class="product-card-brand">${escapeHtml(product.brand || 'Mirari')}</p>
           <h2 class="product-card-name">${escapeHtml(product.name || 'Товар')}</h2>
-          <p class="product-card-price">${escapeHtml(formatByn(product.priceByn || 0))}<small>${escapeHtml(formatRub(product.priceRub || product.price || 0))}</small></p>
+          <p class="product-card-price"><span>${escapeHtml(formatByn(product.priceByn || 0))}</span><span>${escapeHtml(formatRub(product.priceRub || product.price || 0))}</span></p>
         </div>
       </button>`).join('');
-    els.empty.hidden = state.currentItems.length > 0;
-    els.loadMore.hidden = state.visibleCount >= state.currentItems.length;
-    if (state.currentItems.length) {
-      els.status.textContent = `${state.currentItems.length.toLocaleString('ru-RU')} ${plural(state.currentItems.length, 'товар', 'товара', 'товаров')}`;
+    els.empty.hidden = filtered.length > 0;
+    els.loadMore.hidden = state.visibleCount >= filtered.length;
+    els.filterResultCount.textContent = state.subcategory ? `${filtered.length.toLocaleString('ru-RU')} из ${state.currentItems.length.toLocaleString('ru-RU')}` : '';
+    const count = activeFilterCount();
+    els.filterCount.textContent = count ? String(count) : '';
+    els.filterCount.hidden = count === 0;
+    if (filtered.length) {
+      els.status.textContent = `${filtered.length.toLocaleString('ru-RU')} ${plural(filtered.length, 'товар', 'товара', 'товаров')}`;
+    } else if (state.currentItems.length) {
+      els.status.textContent = 'По выбранным фильтрам ничего не найдено';
     }
   }
 
@@ -455,12 +588,18 @@
     els.productView.hidden = false;
     els.back.hidden = false;
     const images = (product.images || []).filter(Boolean).slice(0, 12);
-    els.productGallery.innerHTML = (images.length ? images : ['']).map((src, index) => `
-      <figure>${imageMarkup(baseUrl(src), `${product.name || 'Товар'}, фото ${index + 1}`)}</figure>`).join('');
+    const galleryImages = images.length ? images : [''];
+    els.productGallery.innerHTML = galleryImages.map((src, index) => `
+      <figure data-gallery-index="${index}">${imageMarkup(baseUrl(src), `${product.name || 'Товар'}, фото ${index + 1}`)}</figure>`).join('');
+    els.productDots.innerHTML = galleryImages.length > 1
+      ? galleryImages.map((_, index) => `<button type="button" class="gallery-dot${index === 0 ? ' is-active' : ''}" data-gallery-dot="${index}" aria-label="Фото ${index + 1}"></button>`).join('')
+      : '';
+    els.productDots.hidden = galleryImages.length <= 1;
+    els.productGallery.scrollLeft = 0;
     els.productBrand.textContent = product.brand || 'Mirari';
     els.productName.textContent = product.name || 'Товар';
-    els.productPrice.innerHTML = `${escapeHtml(formatByn(product.priceByn || 0))}<small> / ${escapeHtml(formatRub(product.priceRub || product.price || 0))}</small>`;
-    const description = [product.description, product.details].filter(Boolean).join('\n\n');
+    els.productPrice.innerHTML = `<span>${escapeHtml(formatByn(product.priceByn || 0))}</span><span class="price-divider">/</span><span>${escapeHtml(formatRub(product.priceRub || product.price || 0))}</span>`;
+    const description = [cleanDescriptionPart(product.description), cleanDescriptionPart(product.details)].filter(Boolean).join('\n\n');
     els.productDescription.innerHTML = description
       ? description.split(/\n+/).map((line) => `<p>${escapeHtml(line)}</p>`).join('')
       : '<p>Подробности, доступные варианты и исполнение уточнит менеджер.</p>';
@@ -640,6 +779,8 @@
       els.productGrid.hidden = false;
       els.back.hidden = false;
       els.breadcrumbs.hidden = true;
+      els.filterToolbar.hidden = true;
+      els.filterPanel.hidden = true;
       renderProducts();
     } catch (error) {
       console.error(error);
@@ -715,6 +856,26 @@
       els.searchInput.value = '';
       performSearch('');
       els.searchInput.focus();
+    });
+    els.filterToggle.addEventListener('click', () => { els.filterPanel.hidden = !els.filterPanel.hidden; });
+    els.filterCurrencyButtons.forEach((button) => button.addEventListener('click', () => {
+      state.filters.currency = button.dataset.filterCurrency;
+      els.filterCurrencyButtons.forEach((item) => item.classList.toggle('is-active', item === button));
+    }));
+    els.filterApply.addEventListener('click', applyFilterForm);
+    els.filterReset.addEventListener('click', () => {
+      resetFilters();
+      els.filterPanel.hidden = true;
+    });
+    els.productGallery.addEventListener('scroll', () => {
+      const width = els.productGallery.clientWidth || 1;
+      const index = Math.max(0, Math.min(els.productDots.children.length - 1, Math.round(els.productGallery.scrollLeft / width)));
+      [...els.productDots.children].forEach((dot, dotIndex) => dot.classList.toggle('is-active', dotIndex === index));
+    }, { passive: true });
+    els.productDots.addEventListener('click', (event) => {
+      const dot = event.target.closest('[data-gallery-dot]');
+      if (!dot) return;
+      els.productGallery.scrollTo({ left: Number(dot.dataset.galleryDot) * els.productGallery.clientWidth, behavior: 'smooth' });
     });
     document.querySelector('[data-reset-search]').addEventListener('click', () => { els.searchInput.value = ''; performSearch(''); });
     els.addToCart.addEventListener('click', () => state.activeProduct && addProductToCart(state.activeProduct));
