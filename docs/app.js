@@ -82,6 +82,7 @@
     navItems: [...document.querySelectorAll('[data-tab]')],
     genderButtons: [...document.querySelectorAll('[data-gender]')],
     catalogTitle: document.querySelector('#catalog-title'),
+    homeInfo: document.querySelector('[data-home-info]'),
     categoryGrid: document.querySelector('[data-category-grid]'),
     subcategoryGrid: document.querySelector('[data-subcategory-grid]'),
     productGrid: document.querySelector('[data-product-grid]'),
@@ -363,6 +364,7 @@
     state.searchQuery = '';
     state.currentItems = [];
     els.catalogTitle.textContent = 'Выберите раздел';
+    els.homeInfo.hidden = false;
     els.categoryGrid.hidden = false;
     els.subcategoryGrid.hidden = true;
     els.productGrid.hidden = true;
@@ -396,6 +398,7 @@
       return;
     }
     els.catalogTitle.textContent = category.label || categoryLabel(categorySlug);
+    els.homeInfo.hidden = true;
     els.categoryGrid.hidden = true;
     els.subcategoryGrid.hidden = false;
     els.productGrid.hidden = true;
@@ -432,6 +435,7 @@
     state.searchQuery = '';
     resetFilters({ render: false });
     els.catalogTitle.textContent = subcategorySlug ? subcategoryLabel(subcategorySlug) : categoryLabel(categorySlug);
+    els.homeInfo.hidden = true;
     els.categoryGrid.hidden = true;
     els.subcategoryGrid.hidden = true;
     els.productGrid.hidden = false;
@@ -774,6 +778,7 @@
       state.subcategory = null;
       state.visibleCount = PAGE_SIZE;
       els.catalogTitle.textContent = `Поиск: ${state.searchQuery}`;
+      els.homeInfo.hidden = true;
       els.categoryGrid.hidden = true;
       els.subcategoryGrid.hidden = true;
       els.productGrid.hidden = false;
@@ -893,6 +898,7 @@
     els.checkout.addEventListener('click', checkoutCart);
     document.querySelector('[data-go-catalog]').addEventListener('click', () => setTab('catalog'));
     document.querySelector('[data-contact-manager]').addEventListener('click', () => openManager('Здравствуйте! Хочу получить консультацию по каталогу Mirari.'));
+    document.querySelector('[data-home-contact-manager]').addEventListener('click', () => openManager('Здравствуйте! Хочу получить персональный подбор по каталогу Mirari.'));
     window.addEventListener('popstate', () => {
       const id = new URL(window.location.href).searchParams.get('product');
       if (id) loadProduct(id).catch(() => renderCategories());

@@ -191,6 +191,71 @@ h1 {
 }
 .gender-button.is-active { color: var(--white); background: var(--navy); }
 
+.home-info-card {
+  margin: 0 0 18px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 14px;
+  overflow: hidden;
+  border-radius: 18px;
+  color: var(--white);
+  background:
+    radial-gradient(circle at 100% 0, rgba(217,193,140,.18), transparent 42%),
+    var(--navy);
+}
+.home-info-copy { min-width: 0; }
+.home-info-kicker {
+  margin: 0 0 7px;
+  color: #d9c18c;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.home-info-card h2 {
+  margin: 0;
+  max-width: 390px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 21px;
+  font-weight: 400;
+  line-height: 1.08;
+}
+.home-info-card p:last-child {
+  margin: 9px 0 0;
+  max-width: 460px;
+  color: rgba(255,255,255,.68);
+  font-size: 11px;
+  line-height: 1.48;
+}
+.home-info-button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 999px;
+  color: var(--navy);
+  background: var(--white);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.home-info-button svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.home-info-button:active { transform: scale(.98); }
+
 .breadcrumbs {
   margin: 2px 0 16px;
   font-size: 12px;
@@ -433,7 +498,6 @@ h1 {
 .product-gallery-shell {
   position: relative;
   margin: -22px -14px 0;
-  padding-bottom: 28px;
   background: var(--white);
 }
 .product-gallery {
@@ -456,12 +520,14 @@ h1 {
 .product-gallery-dots {
   position: absolute;
   left: 50%;
-  bottom: 10px;
+  z-index: 3;
+  bottom: 14px;
   max-width: calc(100% - 28px);
   display: flex;
   justify-content: center;
   gap: 6px;
   transform: translateX(-50%);
+  pointer-events: auto;
 }
 .gallery-dot {
   width: 6px;
@@ -470,10 +536,11 @@ h1 {
   border: 0;
   border-radius: 999px;
   padding: 0;
-  background: rgba(33, 44, 69, .24);
-  transition: width .18s ease, background .18s ease;
+  background: rgba(255,255,255,.58);
+  box-shadow: 0 1px 5px rgba(0,0,0,.28);
+  transition: width .18s ease, background .18s ease, opacity .18s ease;
 }
-.gallery-dot.is-active { width: 18px; background: var(--navy); }
+.gallery-dot.is-active { width: 18px; background: var(--white); }
 .product-detail-copy { padding: 25px 2px 0; }
 .product-detail-brand {
   margin: 0 0 8px;
@@ -581,6 +648,11 @@ h1 {
 
 .toast { position: fixed; z-index: 80; left: 50%; bottom: calc(86px + var(--safe-bottom)); width: calc(100% - 32px); max-width: 520px; transform: translateX(-50%); padding: 13px 16px; border-radius: 14px; color: var(--white); background: var(--navy); box-shadow: var(--shadow); text-align: center; font-size: 13px; animation: toastIn .2s ease both; }
 @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+@media (max-width: 430px) {
+  .home-info-card { grid-template-columns: 1fr; align-items: start; }
+  .home-info-button { width: 100%; }
+}
 
 @media (min-width: 620px) {
   .main-content { padding-left: 24px; padding-right: 24px; }
